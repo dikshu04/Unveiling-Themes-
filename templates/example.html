@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unveiling Themes</title>
+    <style>
+        /* Add some basic CSS for styling the navigation bar */
+        .navbar {
+            background-color: #87C4FF; /* Change the background color to blue */
+            overflow: hidden;
+            position: fixed; /* Make the navbar fixed */
+            top: 0; /* Set it at the top of the page */
+            width: 100%; /* Make it span the full width of the page */
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar a.right {
+            float: right;
+        }
+
+        body {
+            padding-top: 60px;
+            background-color: #C3ACD0;
+        }
+
+        /* Style the section */
+        .section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+        }
+
+        /* Style the button */
+        .btn-predict {
+            background-color: green;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style the box */
+        .box {
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        /* Style the text area */
+        .box textarea {
+            width: 100%; /* Same width as the parent container (.box) */
+            height: 150px;
+        }
+
+        /* Style the analyzed topic box */
+        .analyzed-box {
+            display: none; /* Initially hidden */
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+    </style>
+</head>
+<body>
+
+<div class="navbar">
+    <a href="#">Topic Analyzer</a>
+    <a href="#" class="right">Home</a>
+</div>
+
+<div class="section">
+    <h2>Predict Topics</h2>
+    <div class="box">
+        <div>
+            <textarea id="input-text" placeholder="Enter text..."></textarea>
+        </div>
+        <div>
+            <input type="file" id="input-file" accept=".txt">
+        </div>
+        <div>
+            <button class="btn-predict" id="predict-button">Predict</button>
+        </div>
+    </div>
+</div>
+
+<div class="section">
+    <h2>Analyzed Topic</h2>
+    <div class="analyzed-box">
+        <!-- Content of the analyzed topic goes here -->
+        <div id="result"></div>
+    </div>
+</div>
+
+<script>
+    // JavaScript to read file contents and set them in the text area
+    document.getElementById("input-file").addEventListener("change", function(e) {
+        var file = e.target.files[0];
+        var reader = new FileReader();
+        reader.onload = function(event) {
+            var fileContent = event.target.result;
+            document.getElementById("input-text").value = fileContent;
+        };
+        reader.readAsText(file);
+    });
+    
+    // JavaScript to toggle the visibility of the analyzed topic box
+    document.getElementById("predict-button").addEventListener("click", function() {
+        // Toggle the display property of the analyzed-box
+        var analyzedBox = document.querySelector(".analyzed-box");
+        if (analyzedBox.style.display === "none") {
+            analyzedBox.style.display = "block";
+        } else {
+            analyzedBox.style.display = "none";
+        }
+    });
+
+    document.getElementById("predict-button").addEventListener("click", function() {
+        const inputText = document.getElementById("input-text").value;
+    
+        // Send a POST request to the /predict route
+        fetch("/predict", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({ text: inputText }),
+        })
+        .then(response => response.json())
+        .then(data => {
+            // Display the predicted topic keywords
+            const resultDiv = document.getElementById("result");
+            resultDiv.innerHTML = "<p>" + data.max_topic_keywords + "</p>";
+        })
+        .catch(error => {
+            console.error("Error:", error);
+        });
+    });
+</script>
+</body>
+</html>

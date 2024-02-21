@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Unveiling Themes</title>
+    <style>
+        /* Add some basic CSS for styling the navigation bar */
+        .navbar {
+            background-color: #192655;
+            overflow: hidden;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .navbar a {
+            float: left;
+            display: block;
+            color: white;
+            text-align: center;
+            padding: 14px 16px;
+            text-decoration: none;
+        }
+
+        .navbar a.right {
+            float: right;
+        }
+
+        body {
+            padding-top: 80px;
+            margin-bottom: 20px; /* Adjusted margin-bottom for vacant space before the footer */
+            background-color: #C3ACD0;
+        }
+
+        /* Style the section */
+        .section {
+            margin: 20px;
+            padding: 20px;
+            border: 1px solid #ddd;
+            background-color: #f5f5f5;
+        }
+
+        /* Style the button */
+        #predict-button {
+            margin-top: 10px;
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style the box */
+        .box {
+            padding: 15px;
+            border: 1px solid #ddd;
+            background-color: white;
+        }
+
+        /* Style the text area */
+        .box textarea {
+            width: 100%;
+            height: 200px;
+        }
+
+        /* Style the file input */
+        #input-file {
+            padding: 10px;
+            margin-top: 10px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        /* Style the analyzed result */
+        #result {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #eaeaea;
+        }
+
+        #result h3 {
+            font-size: 18px;
+            color: #333;
+            margin: 0;
+        }
+        myfooter
+        {
+            padding-bottom:20px;
+        }
+        footer {
+            background-color: #333;
+            color: #fff;
+            padding: 10px;
+            text-align: center;
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="navbar">
+        <a href="#">Topic Analyzer</a>
+        <a href="#" class="right">Home</a>
+    </div>
+    <div class="section">
+        <h2>Predict Topics</h2>
+        <div class="box">
+            <div>
+                <textarea id="input-text" placeholder="Enter text..."></textarea>
+            </div>
+            <div>
+                <input type="file" id="input-file" accept=".txt">
+            </div>
+            <div>
+                <button id="predict-button">Predict</button>
+            </div>
+        </div>
+    </div>
+    <div class="section">
+        <h2>Analyzed Topic</h2>
+        <div class="analyzed-box">
+            <!-- Content of the analyzed topic goes here -->
+            <div id="result"></div>
+        </div>
+    </div>
+    <div>
+        <div id="myfooter">
+            <BR>
+        </div>
+    </div>
+    <footer>
+        &copy; 2023 Unveiling Themes
+    </footer>
+
+    <script>
+        document.getElementById("predict-button").addEventListener("click", function() {
+            const inputFile = document.getElementById("input-file");
+            const inputText = document.getElementById("input-text").value;
+
+            if (inputFile.files.length > 0) {
+                const fileReader = new FileReader();
+
+                fileReader.onload = function(e) {
+                    const fileContent = e.target.result;
+
+                    fetch("/predict", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                        },
+                        body: JSON.stringify({ text: fileContent }),
+                    })
+                    .then(response => response.json())
+                    .then(data => {
+                        const resultDiv = document.getElementById("result");
+                        resultDiv.innerHTML = "<h3>" + data.max_topic_keywords + "</h3>";
+                        document.getElementById("input-text").value = "";
+                    })
+                    .catch(error => {
+                        console.error("Error:", error);
+                    });
+                };
+                fileReader.readAsText(inputFile.files[0]);
+            } else {
+                fetch("/predict", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: JSON.stringify({ text: inputText }),
+                })
+                .then(response => response.json())
+                .then(data => {
+                    const resultDiv = document.getElementById("result");
+                    resultDiv.innerHTML = "<h3>" + data.max_topic_keywords + "</h3>";
+
+                    document.getElementById("input-text").value = "";
+                })
+                .catch(error => {
+                    console.error("Error:", error);
+                });
+            }
+        });
+    </script>
+</body>
+</html>
